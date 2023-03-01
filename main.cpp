@@ -18,12 +18,8 @@ class Shared_ptr_toy {
     int *count = nullptr;
   public:
     Shared_ptr_toy(){};
-    Shared_ptr_toy (T *other) {
-        pointer = other;
-        count = new int(1);
-    }
     Shared_ptr_toy(std::string inName) {
-        pointer = new Toy(inName);
+        pointer = new T(inName);
         count = new int(1);
     }
     Shared_ptr_toy (const Shared_ptr_toy &other) {
@@ -36,8 +32,12 @@ class Shared_ptr_toy {
             return *this;
         }
         if (pointer != nullptr) {
-            delete pointer;
-            delete count;
+            if (*count == 1) {
+                delete pointer;
+                delete count;
+            } else {
+                --*count;
+            }
         }
         count = other.count;
         ++*count;
@@ -57,14 +57,12 @@ class Shared_ptr_toy {
 
 template<typename T>
 Shared_ptr_toy<T> make_shared_toy (std::string inName) {
-    Shared_ptr_toy<T> tmpObj = Shared_ptr_toy<T>(new T(inName));
-    return tmpObj;
+    return Shared_ptr_toy<T>(inName);
 }
 
 template<typename T>
 Shared_ptr_toy<T> make_shared_toy (Shared_ptr_toy<T> &other) {
-    Shared_ptr_toy<T> tmpObj = other;
-    return tmpObj;
+    return Shared_ptr_toy<T>(other);
 }
 
 int main() {
@@ -72,7 +70,8 @@ int main() {
         Shared_ptr_toy<Toy> toy1;
         Shared_ptr_toy<Toy> toy2("ball");
         toy1 = toy2;
-        Shared_ptr_toy<Toy> toy3(new Toy("bone"));
+        Shared_ptr_toy<Toy> toy3("bone");
+        Shared_ptr_toy<Toy> toy7(toy3);
         toy3 = toy2;
         Shared_ptr_toy<Toy> toy4(toy3);
     }
@@ -82,6 +81,5 @@ int main() {
     Shared_ptr_toy<Toy> toy3;
     toy3 = toy1;
     Shared_ptr_toy<Toy> toy4(toy3);
-
     return 0;
 }
